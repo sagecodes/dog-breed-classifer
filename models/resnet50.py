@@ -1,5 +1,7 @@
 import torchvision.models as models
 import torch.nn as nn
+import torch
+import torch.optim as optim
 
 import numpy as np
 from PIL import ImageFile
@@ -10,10 +12,11 @@ from IPython.display import display, clear_output
 
 class Resnet50:
     
-    def __init__(self, num_classes, use_cuda=False):
+    def __init__(self, num_classes, lr=0.001,use_cuda=False):
 
         # use pre-trained resnet50 model from pytorch
         self.model = models.resnet50(pretrained=True)
+        self.use_cuda = use_cuda
 
         # freeze model params for features
         for param in self.model.parameters():
@@ -24,13 +27,16 @@ class Resnet50:
                             num_classes,
                             bias=True)
 
-        if use_cuda:
-            self.model = model.cuda()
+        # self.criterion = nn.CrossEntropyLoss()
+        # self.optimizer = optim.SGD(self.model().fc.parameters(), lr=0.001)
 
+        if self.use_cuda:
+            self.model = self.model.cuda()
+        
 
 
     def train(self, n_epochs, loaders, optimizer,
-                        criterion, save_path):
+                        criterion, save_path, verbose=False):
         """returns trained model"""
         
         train_output = []
@@ -47,7 +53,7 @@ class Resnet50:
             self.model.train()
             for batch_idx, (data, target) in enumerate(loaders['train']):
                 # move to GPU
-                if use_cuda:
+                if self.use_cuda:
                     data, target = data.cuda(), target.cuda()
                     
                 ## find the loss and update the model parameters accordingly
@@ -75,8 +81,8 @@ class Resnet50:
                 if verbose:
                     print('Epoch #{}, Batch #{} train_loss: {:.6f}'.format(epoch, batch_idx + 1, train_loss))
                 else:
-                clear_output(wait=True)
-                display('Epoch #{}, Batch #{} train_loss: {:.6f}'.format(epoch, batch_idx + 1, train_loss))
+                    clear_output(wait=True)
+                    display('Epoch #{}, Batch #{} train_loss: {:.6f}'.format(epoch, batch_idx + 1, train_loss))
                 
 
             ######################    
@@ -85,7 +91,7 @@ class Resnet50:
             self.model.eval()
             for batch_idx, (data, target) in enumerate(loaders['valid']):
                 # move to GPU
-                if use_cuda:
+                if self.use_cuda:
                     data, target = data.cuda(), target.cuda()
                     
                 ## update the average validation loss
@@ -108,4 +114,8 @@ class Resnet50:
         
         self.history = train_output
         # return trained model
+        return self.model
+
+
+    def get_model(self):
         return self.model
