@@ -1,6 +1,8 @@
 # ignore datasets
 /dogImages
 /lfw
+/models
+/images
 
 .ipynb_checkpoints
 
