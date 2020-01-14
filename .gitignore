@@ -1,8 +1,10 @@
 # ignore datasets
 /dogImages
 /lfw
-/models
 /images
+
+# ignore saved models
+/trained_models
 
 .ipynb_checkpoints
 
