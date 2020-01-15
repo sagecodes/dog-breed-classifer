@@ -2,11 +2,14 @@ import torchvision.models as models
 import torch.nn as nn
 import torch
 import torch.optim as optim
+import torchvision.transforms as transforms
+
 
 import numpy as np
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-from IPython.display import display, clear_output
+from PIL import Image
+
 
 # TODO refactor for model type?
 
@@ -38,6 +41,8 @@ class Resnet50:
     def train(self, n_epochs, loaders, optimizer,
                         criterion, save_path, verbose=False):
         """returns trained model"""
+
+        # self.class_names = [item[4:].replace("_", " ") for item in loaders['train'].dataset.classes]
         
         train_output = []
         
@@ -119,3 +124,32 @@ class Resnet50:
 
     def get_model(self):
         return self.model
+
+    def load_model(self):
+        pass
+
+    def predict_breed_transfer(self,img_path,verbose=False):
+        # load the image and return the predicted breed
+        image = Image.open(img_path)
+        
+        # Transform set to 244px recommended from pytorch doc 
+        # for this pre trained network & change to tensor
+        transform = transforms.Compose([transforms.Resize(size=(244, 244)),
+                                        transforms.ToTensor()])
+                                        
+        img = transform(image)[:3,:,:].unsqueeze(0)
+        
+        if self.use_cuda:
+            img = img.cuda()
+        
+        preds = self.model(img)
+        
+        prediction = torch.max(preds,1)[1].item()
+        
+        print(prediction)
+        # if verbose:
+        #     print("Predicted class is: {}(index: {})".format(
+        #                                             self.class_names[prediction],
+        #                                             prediction))        
+        # # return only highest prediction index
+        return prediction
