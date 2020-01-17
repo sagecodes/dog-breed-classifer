@@ -10,34 +10,10 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 from PIL import Image
 
-    
-def restnet50(self, num_classes, lr=0.001,use_cuda=False):
-
-    # use pre-trained resnet50 model from pytorch
-    model = models.resnet50(pretrained=True)
-    use_cuda = use_cuda
-
-    # freeze model params for features
-    for param in model.parameters():
-        param.requires_grad = False
-
-    # configure output layer for number of classes
-    model.fc = nn.Linear(2048,
-                        num_classes,
-                        bias=True)
-
-    # self.criterion = nn.CrossEntropyLoss()
-    # self.optimizer = optim.SGD(self.model().fc.parameters(), lr=0.001)
-
-    if use_cuda:
-        model = model.cuda()
-
-    return model
-        
-
 
 def train(model, n_epochs, loaders, optimizer, use_cuda
                     criterion, save_path, verbose=False):
+                    
     """returns trained model"""
 
     # self.class_names = [item[4:].replace("_", " ") for item in loaders['train'].dataset.classes]
@@ -120,7 +96,7 @@ def train(model, n_epochs, loaders, optimizer, use_cuda
     return model
 
 
-def predict(img_path,verbose=False):
+def predict(model, img_path,verbose=False):
     # load the image and return the predicted breed
     image = Image.open(img_path)
     
