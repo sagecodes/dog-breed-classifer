@@ -10,15 +10,16 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 from PIL import Image
 
+from IPython.display import display, clear_output
 
-def train(model, n_epochs, loaders, optimizer, use_cuda
-                    criterion, save_path, verbose=False):
-                    
-    """returns trained model"""
 
-    # self.class_names = [item[4:].replace("_", " ") for item in loaders['train'].dataset.classes]
-    
+def train(model, n_epochs, loaders, optimizer,
+                    criterion, device, save_path, verbose=False):
+
+    """returns trained model"""    
     train_output = []
+
+    model = model.to(device)
     
     # initialize tracker for minimum validation loss
     valid_loss_min = np.Inf 
@@ -31,14 +32,10 @@ def train(model, n_epochs, loaders, optimizer, use_cuda
         # train the model
         model.train()
         for batch_idx, (data, target) in enumerate(loaders['train']):
-            # move to GPU
-            if use_cuda:
-                data, target = data.cuda(), target.cuda()
-                
-            ## find the loss and update the model parameters accordingly
-            ## record the average training loss, using something like
-            ## train_loss = train_loss + ((1 / (batch_idx + 1)) * (loss.data - train_loss))
-            
+            # move to device
+            data = data.to(device)
+            target = target.to(device)
+
             # reset gradient weights to zero
             optimizer.zero_grad()
             
@@ -53,6 +50,7 @@ def train(model, n_epochs, loaders, optimizer, use_cuda
             # Adjust weights w/ Gradient
             optimizer.step()
             
+            ## find the loss and update the model parameters accordingly
             train_loss = train_loss + ((1 / (batch_idx + 1)) * (loss.data - train_loss))
             
             # Output info in jupyter notebook
@@ -69,9 +67,10 @@ def train(model, n_epochs, loaders, optimizer, use_cuda
         ######################
         model.eval()
         for batch_idx, (data, target) in enumerate(loaders['valid']):
-            # move to GPU
-            if use_cuda:
-                data, target = data.cuda(), target.cuda()
+            
+            # move to device
+            data = data.to(device)
+            target = target.to(device)
                 
             ## update the average validation loss
             output = model(data)
@@ -92,12 +91,16 @@ def train(model, n_epochs, loaders, optimizer, use_cuda
             valid_loss_min = valid_loss
     
     history = train_output
+
+    # model.log(history)
+    # model.load()
     # return trained model
     return model
 
 
-def predict(model, img_path,verbose=False):
+def predict(model, img_path, device, verbose=False):
     # load the image and return the predicted breed
+    
     image = Image.open(img_path)
     
     # Transform set to 244px recommended from pytorch doc 
@@ -107,8 +110,9 @@ def predict(model, img_path,verbose=False):
                                     
     img = transform(image)[:3,:,:].unsqueeze(0)
     
-    if use_cuda:
-        img = img.cuda()
+    # Change to device
+    img = img.to(device)
+    model = model.to(device)
     
     preds = model(img)
     

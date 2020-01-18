@@ -10,56 +10,39 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 from PIL import Image
 
-
-# TODO refactor for model type?
-
-# Base model
-    # init
-
-# forward (build)
-#   break
-#  
-# Save model
-#
-# Load model
-#
-# Log function
-#
-
-
 class Resnet50_pretrained:
     
-    def __init__(self, num_classes, use_cuda=False):
-
-        self.use_cuda = use_cuda
-
-        # use pre-trained resnet50 model from pytorch
+    def __init__(self, num_classes):
+        # self.device = device
+        self.num_classes = num_classes
         self.model = models.resnet50(pretrained=True)
+        self.fc_out = nn.Linear(2048, num_classes, bias=True)
+        
+    def build(self, verbose=False):
 
         # freeze model params for features
         for param in self.model.parameters():
             param.requires_grad = False
 
-        # configure output layer for number of classes
-        self.model.fc = nn.Linear(2048,
-                            num_classes,
-                            bias=True)
+        # set output layer to num classes
+        self.model.fc = self.fc_out
 
-        if self.use_cuda:
-            self.model = self.model.cuda()
-        
-    def build(self):
+        if verbose:
+            print(self.model)
+
+        # self.model.to(self.device)
 
         return self.model
+
 
     def save(self):
         '''Save model'''
         pass
 
-    def load():
+    def load(self):
         '''load model weights'''
         pass
 
-    def log():
-        '''Training & Validation logs '''
-        pass
+    # def log(self):
+    #     '''Training & Validation logs '''
+    #     pass
