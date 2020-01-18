@@ -1,3 +1,8 @@
+
+You can checkout the prompt for the dog_app notebook at the original udacity deep learning repo [here](https://github.com/udacity/deep-learning-v2-pytorch) 
+
+
+
 [//]: # (Image References)
 
 [image1]: ./images/sample_dog_output.png "Sample Output"
