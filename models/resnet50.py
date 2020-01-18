@@ -43,6 +43,6 @@ class Resnet50_pretrained:
         '''load model weights'''
         pass
 
-    # def log(self):
-    #     '''Training & Validation logs '''
-    #     pass
+    def log(self):
+        '''Training & Validation logs '''
+        pass
