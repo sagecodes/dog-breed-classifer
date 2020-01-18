@@ -39,5 +39,12 @@ def image_data_loader(data,batch_size,num_workers,shuffle=False):
 
     return img_loader
 
-
-
+def dir_loader_stack(train_dir,img_size,batch_size,num_workers,shuffle=False):
+    
+    data = image_data_loader(
+        images_from_dir(train_dir,
+                        image_transforms(img_size)),
+                        batch_size,
+                        num_workers,
+                        shuffle)
+    return data
